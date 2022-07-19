@@ -17,9 +17,8 @@ Create TABLE `pet` (
 );
 
 Create TABLE `ownership` (
-  `pet_id` int NOT NULL,
+  `pet_id` int UNIQUE NOT NULL,
   `owner_id` int NOT NULL,
-  PRIMARY KEY (`pet_id`),
   CONSTRAINT `pet_id` FOREIGN KEY (`pet_id`) REFERENCES `pet` (`id`),
   CONSTRAINT `owner_id` FOREIGN KEY (`owner_id`) REFERENCES `owners` (`id`)
 );

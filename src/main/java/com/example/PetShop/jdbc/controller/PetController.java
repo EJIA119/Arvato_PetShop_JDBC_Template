@@ -34,8 +34,8 @@ public class PetController {
     }
 
     @PostMapping("/add")
-    public Pet create(@RequestBody Pet_Owner_DTO dto) throws ValidationException{
-        return petDao.create(dto.getPet(), dto.getOwner());
+    public Pet create(@RequestBody Pet pet) throws ValidationException{
+        return petDao.create(pet);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -44,8 +44,8 @@ public class PetController {
     }
 
     @PutMapping("/update")
-    public Pet update(@RequestBody Pet_Owner_DTO dto) throws ValidationException {
-        return petDao.update(dto);
+    public Pet update(@RequestBody Pet pet) throws ValidationException {
+        return petDao.update(pet);
     }
 
     @GetMapping("/topName")

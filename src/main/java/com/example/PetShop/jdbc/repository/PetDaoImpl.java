@@ -36,7 +36,7 @@ public class PetDaoImpl implements PetDao {
     }
 
     @Override
-    public Pet create(Pet newPet, Owner owner) throws ValidationException {
+    public Pet create(Pet newPet) throws ValidationException {
 
 
         if(newPet ==null || newPet.getName() == null || newPet.getBreed() == null)
@@ -49,9 +49,6 @@ public class PetDaoImpl implements PetDao {
         try {
             String insertStatement = "INSERT INTO pet (id, name, breed, date_created, date_modified) VALUES (?, ?, ?, ?, ?);";
             jdbcTemplate.update(insertStatement, newPet.getId(), newPet.getName(), newPet.getBreed(), newPet.getDate_created(), newPet.getDate_modified());
-
-            if(owner != null)
-                ownershipDao.createRelation(newPet.getId(), owner.getId());
 
             return findById(newPet.getId());
         } catch (Exception e) {
@@ -89,27 +86,15 @@ public class PetDaoImpl implements PetDao {
     }
 
     @Override
-    public Pet update(Pet_Owner_DTO dto) throws ValidationException {
-
-        findById(dto.getPet().getId());
-
-        if(dto.getOwner() != null)
-            ownerDao.findById(dto.getOwner().getId());
+    public Pet update(Pet pet) throws ValidationException {
 
         try {
             String updateStatement = "UPDATE pet SET name = ?, breed = ?, date_modified = ? WHERE (id = ?);";
-            jdbcTemplate.update(updateStatement, dto.getPet().getName(), dto.getPet().getBreed(), today, dto.getPet().getId());
+            jdbcTemplate.update(updateStatement, pet.getName(), pet.getBreed(), today, pet.getId());
 
-            if(dto.getOwner() != null){
-                if(ownershipDao.isExistRecord(dto.getPet().getId())){
-                    ownershipDao.updateOwner(dto.getPet().getId(), dto.getOwner().getId());
-                }else
-                    ownershipDao.createRelation(dto.getPet().getId(), dto.getOwner().getId());
-            }
-
-            return findById(dto.getPet().getId());
+            return findById(pet.getId());
         } catch (Exception e) {
-            throw new ValidationException(e.getMessage());
+            throw new ValidationException("Pet Update: " + e.getMessage());
         }
 
     }

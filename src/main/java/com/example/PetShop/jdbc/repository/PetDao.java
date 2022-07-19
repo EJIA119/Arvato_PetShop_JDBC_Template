@@ -9,13 +9,13 @@ public interface PetDao {
 
     List<Pet> findAll();
 
-    Pet create(Pet pet, Owner owner) throws ValidationException;
+    Pet create(Pet pet) throws ValidationException;
 
     Pet findById(int id) throws ValidationException;
 
     String deleteById(int id) throws ValidationException;
 
-    Pet update(Pet_Owner_DTO dto) throws ValidationException;
+    Pet update(Pet pet) throws ValidationException;
 
     List<TopName> topName() throws ValidationException;
 }

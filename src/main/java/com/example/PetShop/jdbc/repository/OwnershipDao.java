@@ -1,16 +1,14 @@
 package com.example.PetShop.jdbc.repository;
 
 import com.example.PetShop.jdbc.model.Ownership;
-import com.example.PetShop.jdbc.model.Pet_Owner_DTO;
 
-import javax.xml.bind.ValidationException;
 import java.util.List;
 
 public interface OwnershipDao {
 
-    List<Pet_Owner_DTO> findAll();
+    List<Ownership> findAll();
 
-    Ownership createRelation(int pet_id, int owner_id) throws Exception;
+    Ownership create(Ownership ownership) throws Exception;
 
     Ownership findByPetId(int pet_id) throws Exception;
 
@@ -18,7 +16,7 @@ public interface OwnershipDao {
 
     Ownership findByOwnerId(int owner_id) throws Exception;
 
-    Ownership updateOwner(int pet_id, int owner_id) throws Exception;
+    Ownership update(Ownership ownership) throws Exception;
 
     void delete(int pet_id) throws Exception;
 

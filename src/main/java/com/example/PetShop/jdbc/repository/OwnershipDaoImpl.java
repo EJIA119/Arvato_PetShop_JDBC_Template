@@ -17,35 +17,23 @@ public class OwnershipDaoImpl implements OwnershipDao{
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Lazy
-    @Autowired
-    private OwnerDao ownerDao;
-
-    @Lazy
-    @Autowired
-    private PetDao petDao;
-
     @Override
-    public List<Pet_Owner_DTO> findAll() {
-        String selectQuery = "SELECT * FROM ownership INNER JOIN owners ON ownership.owner_id = owners.id INNER JOIN pet ON ownership.pet_id = pet.id;";
-        return jdbcTemplate.query(selectQuery, new BeanPropertyRowMapper<>(Pet_Owner_DTO.class));
+    public List<Ownership> findAll() {
+        String selectQuery = "SELECT * FROM ownership;";
+        return jdbcTemplate.query(selectQuery, new BeanPropertyRowMapper<>(Ownership.class));
     }
 
     @Override
-    public Ownership createRelation(int pet_id, int owner_id) throws Exception{
-
-        petDao.findById(pet_id);
-        ownerDao.findById(owner_id);
+    public Ownership create(Ownership ownership) throws Exception{
 
         try{
             String insertStatement = "INSERT INTO ownership (pet_id, owner_id) VALUES (?, ?);";
-            jdbcTemplate.update(insertStatement, pet_id, owner_id);
+            jdbcTemplate.update(insertStatement, ownership.getPet_id(), ownership.getOwner_id());
 
-            return findByPetId(pet_id);
+            return findByPetId(ownership.getPet_id());
         }catch(Exception e){
             throw new ValidationException("Create Relation: " + e.getMessage());
         }
-
 
     }
 
@@ -85,16 +73,12 @@ public class OwnershipDaoImpl implements OwnershipDao{
     }
 
     @Override
-    public Ownership updateOwner(int pet_id, int owner_id) throws Exception{
-
-        findByPetId(pet_id);
-        petDao.findById(pet_id);
-        ownerDao.findById(owner_id);
+    public Ownership update(Ownership ownership) throws Exception{
 
         try{
             String updateStatement = "UPDATE ownership SET owner_id = ? WHERE (pet_id = ?);";
-            jdbcTemplate.update(updateStatement, owner_id, pet_id);
-            return findByPetId(pet_id);
+            jdbcTemplate.update(updateStatement, ownership.getOwner_id(), ownership.getPet_id());
+            return findByPetId(ownership.getPet_id());
         }catch(Exception e){
             throw new Exception("Update Relation: " + e.getMessage());
         }
@@ -103,10 +87,8 @@ public class OwnershipDaoImpl implements OwnershipDao{
 
     @Override
     public void delete(int pet_id) throws Exception {
-        findByPetId(pet_id);
 
         try{
-
             String deleteStatement = String.format("DELETE FROM ownership WHERE pet_id = %d", pet_id);
             jdbcTemplate.update(deleteStatement);
         }catch(Exception e){
