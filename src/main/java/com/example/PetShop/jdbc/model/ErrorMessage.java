@@ -1,4 +1,4 @@
-package com.example.PetShop.model;
+package com.example.PetShop.jdbc.model;
 
 public class ErrorMessage {
 
@@ -28,4 +28,5 @@ public class ErrorMessage {
     public void setMessage(String message) {
         Message = message;
     }
+
 }

@@ -1,56 +1,24 @@
-package com.example.PetShop.model;
+package com.example.PetShop.jdbc.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
-
-import javax.persistence.*;
-import java.time.LocalDate;
-
-@Entity
-@Table(name = "pet")
 public class Pet {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
-    @NonNull
     private String name;
-    @NonNull
     private String breed;
-    @NonNull
     private String date_created;
-    @NonNull
     private String date_modified;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonBackReference
-    @JoinColumn(name="owner_id", referencedColumnName = "id")
-    private Owner owner;
+    private int owner_id;
 
     public Pet() {
     }
 
-    public Pet(int id, String name, String breed, String date_created, String date_modified, Owner owner) {
+    public Pet(int id, String name, String breed, String date_created, String date_modified, int owner_id) {
         this.id = id;
         this.name = name;
         this.breed = breed;
         this.date_created = date_created;
         this.date_modified = date_modified;
-        this.owner = owner;
-    }
-
-
-    public Owner getOwner() {
-        return owner;
-    }
-
-    public void setOwner(Owner owner) {
-        this.owner = owner;
+        this.owner_id = owner_id;
     }
 
     public int getId() {
@@ -93,15 +61,23 @@ public class Pet {
         this.date_modified = date_modified;
     }
 
+    public int getOwner_id() {
+        return owner_id;
+    }
+
+    public void setOwner_id(int owner_id) {
+        this.owner_id = owner_id;
+    }
+
     @Override
     public String toString() {
         return "Pet{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", breed='" + breed + '\'' +
-                ", date_created=" + date_created +
-                ", date_modified=" + date_modified +
-                ", Owner=" + owner +
+                ", date_created='" + date_created + '\'' +
+                ", date_modified='" + date_modified + '\'' +
+                ", owner_id=" + owner_id +
                 '}';
     }
 }
