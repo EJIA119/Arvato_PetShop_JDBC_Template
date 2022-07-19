@@ -1,8 +1,6 @@
 package com.example.PetShop.jdbc.repository;
 
-import com.example.PetShop.jdbc.model.Owner;
-import com.example.PetShop.jdbc.model.Pet;
-import com.example.PetShop.jdbc.model.TopName;
+import com.example.PetShop.jdbc.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -25,6 +23,9 @@ public class PetDaoImpl implements PetDao {
     @Autowired
     private OwnerDao ownerDao;
 
+    @Autowired
+    private OwnershipDao ownershipDao;
+
     private final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
     private String today = dateFormat.format(new Date());
 
@@ -35,20 +36,26 @@ public class PetDaoImpl implements PetDao {
     }
 
     @Override
-    public Pet create(Pet newPet) throws ValidationException {
+    public Pet create(Pet newPet, Owner owner) throws ValidationException {
 
-        if (ownerDao.findById(newPet.getOwner_id()) == null)
-            throw new ValidationException(String.format("Owner record with ID (%d) not found.", newPet.getOwner_id()));
 
+        if(newPet ==null || newPet.getName() == null || newPet.getBreed() == null)
+            throw new ValidationException("Pet information could not be null");
+
+        newPet.setId(getLatestID());
         newPet.setDate_created(today);
         newPet.setDate_modified(today);
-        System.out.println(newPet.getOwner_id());
+
         try {
-            String insertStatement = "INSERT INTO pet (name, breed,date_created, date_modified, owner_id) VALUES (?, ?, ?, ?, ?);";
-            jdbcTemplate.update(insertStatement, newPet.getName(), newPet.getBreed(), newPet.getDate_created(), newPet.getDate_modified(), newPet.getOwner_id());
-            return findById(getLatestID());
+            String insertStatement = "INSERT INTO pet (id, name, breed, date_created, date_modified) VALUES (?, ?, ?, ?, ?);";
+            jdbcTemplate.update(insertStatement, newPet.getId(), newPet.getName(), newPet.getBreed(), newPet.getDate_created(), newPet.getDate_modified());
+
+            if(owner != null)
+                ownershipDao.createRelation(newPet.getId(), owner.getId());
+
+            return findById(newPet.getId());
         } catch (Exception e) {
-            throw new ValidationException("Pet information cannot be null.");
+            throw new ValidationException(e.getMessage());
         }
     }
 
@@ -69,6 +76,9 @@ public class PetDaoImpl implements PetDao {
 
             Pet deletePet = findById(id);
 
+            if(ownershipDao.isExistRecord(id))
+                ownershipDao.delete(id);
+
             String deleteStatement = String.format("DELETE FROM pet WHERE id = %d", id);
             jdbcTemplate.update(deleteStatement);
             return String.format("Pet with ID (%d) has been removed. Pet Info: %s", id, deletePet);
@@ -79,17 +89,27 @@ public class PetDaoImpl implements PetDao {
     }
 
     @Override
-    public Pet update(Pet pet) throws ValidationException {
+    public Pet update(Pet_Owner_DTO dto) throws ValidationException {
 
-        findById(pet.getId());
+        findById(dto.getPet().getId());
+
+        if(dto.getOwner() != null)
+            ownerDao.findById(dto.getOwner().getId());
 
         try {
-            String updateStatement = "UPDATE pet SET name = ?, breed = ?, date_modified = ?, owner_id = ? WHERE (id = ?);";
-            jdbcTemplate.update(updateStatement, pet.getName(), pet.getBreed(), today, pet.getOwner_id(), pet.getId());
+            String updateStatement = "UPDATE pet SET name = ?, breed = ?, date_modified = ? WHERE (id = ?);";
+            jdbcTemplate.update(updateStatement, dto.getPet().getName(), dto.getPet().getBreed(), today, dto.getPet().getId());
 
-            return findById(pet.getId());
+            if(dto.getOwner() != null){
+                if(ownershipDao.isExistRecord(dto.getPet().getId())){
+                    ownershipDao.updateOwner(dto.getPet().getId(), dto.getOwner().getId());
+                }else
+                    ownershipDao.createRelation(dto.getPet().getId(), dto.getOwner().getId());
+            }
+
+            return findById(dto.getPet().getId());
         } catch (Exception e) {
-            throw new ValidationException("Pet information cannot be null.");
+            throw new ValidationException(e.getMessage());
         }
 
     }
@@ -98,7 +118,7 @@ public class PetDaoImpl implements PetDao {
     public List<TopName> topName() throws ValidationException{
         try{
             String selectQuery = "SELECT p.name, COUNT(p.name) AS Counter FROM pet p GROUP BY p.name ORDER BY Counter DESC";
-            return jdbcTemplate.query(selectQuery, new BeanPropertyRowMapper<TopName>(TopName.class));
+            return jdbcTemplate.query(selectQuery, new BeanPropertyRowMapper<>(TopName.class));
         }catch(Exception e){
             throw new ValidationException("Something went wrong.");
         }
@@ -106,6 +126,8 @@ public class PetDaoImpl implements PetDao {
 
     private Integer getLatestID() {
         String selectQuery = "SELECT MAX(id) AS 'LatestID' FROM pet;";
-        return jdbcTemplate.queryForObject(selectQuery, Integer.class);
+        Integer latestID = jdbcTemplate.queryForObject(selectQuery, Integer.class);
+
+        return (latestID == null) ? 1 : ++latestID;
     }
 }

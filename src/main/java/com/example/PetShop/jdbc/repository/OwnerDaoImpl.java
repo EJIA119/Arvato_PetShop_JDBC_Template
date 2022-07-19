@@ -38,16 +38,23 @@ public class OwnerDaoImpl implements OwnerDao {
 
     public Owner create(Owner newOwner) throws ValidationException {
         try {
-
+            newOwner.setId(getLatestID());
             newOwner.setDate_created(today);
             newOwner.setDate_modified(today);
 
-            String insertStatement = "INSERT INTO owners (`date_created`, `date_modified`, `first_name`, `last_name`) VALUES (?, ?, ?, ?);";
-            jdbcTemplate.update(insertStatement, newOwner.getDate_created(), newOwner.getDate_modified(), newOwner.getFirst_name(), newOwner.getLast_name());
-            return findById(getLatestID());
+            String insertStatement = "INSERT INTO owners (`id`,`date_created`, `date_modified`, `first_name`, `last_name`) VALUES (?, ?, ?, ?, ?);";
+            jdbcTemplate.update(insertStatement, newOwner.getId(), newOwner.getDate_created(), newOwner.getDate_modified(), newOwner.getFirst_name(), newOwner.getLast_name());
+            return findById(newOwner.getId());
         } catch (Exception e) {
-            throw new ValidationException("Owner information cannot be null.");
+            throw new ValidationException(e.getMessage());
         }
+    }
+
+    private Integer getLatestID() {
+        String selectQuery = "SELECT MAX(id) AS 'LatestID' FROM owners;";
+        Integer latestID = jdbcTemplate.queryForObject(selectQuery, Integer.class);
+
+        return (latestID == null) ? 1 : ++latestID;
     }
 
     public Owner findById(int id) throws ValidationException {
@@ -103,9 +110,6 @@ public class OwnerDaoImpl implements OwnerDao {
         }
     }
 
-    private Integer getLatestID() {
-        String selectQuery = "SELECT MAX(id) AS 'LatestID' FROM owners;";
-        return jdbcTemplate.queryForObject(selectQuery, Integer.class);
-    }
+
 
 }

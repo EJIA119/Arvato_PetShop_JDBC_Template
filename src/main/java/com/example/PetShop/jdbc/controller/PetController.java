@@ -1,9 +1,6 @@
 package com.example.PetShop.jdbc.controller;
 
-import com.example.PetShop.jdbc.model.ErrorMessage;
-import com.example.PetShop.jdbc.model.Owner;
-import com.example.PetShop.jdbc.model.Pet;
-import com.example.PetShop.jdbc.model.TopName;
+import com.example.PetShop.jdbc.model.*;
 import com.example.PetShop.jdbc.repository.OwnerDao;
 import com.example.PetShop.jdbc.repository.PetDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +34,8 @@ public class PetController {
     }
 
     @PostMapping("/add")
-    public Pet create(@RequestBody Pet newPet) throws ValidationException{
-        return petDao.create(newPet);
+    public Pet create(@RequestBody Pet_Owner_DTO dto) throws ValidationException{
+        return petDao.create(dto.getPet(), dto.getOwner());
     }
 
     @DeleteMapping("/delete/{id}")
@@ -47,8 +44,8 @@ public class PetController {
     }
 
     @PutMapping("/update")
-    public Pet update(@RequestBody Pet updatePet) throws ValidationException {
-        return petDao.update(updatePet);
+    public Pet update(@RequestBody Pet_Owner_DTO dto) throws ValidationException {
+        return petDao.update(dto);
     }
 
     @GetMapping("/topName")
@@ -64,7 +61,7 @@ public class PetController {
                 HttpMessageNotReadableException ex, HttpHeaders headers,
                 HttpStatus status, WebRequest request) {
 
-            return new ResponseEntity<>(new ErrorMessage(HttpStatus.BAD_REQUEST.toString(),"Invalid Request"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorMessage(HttpStatus.BAD_REQUEST.toString(),ex.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 

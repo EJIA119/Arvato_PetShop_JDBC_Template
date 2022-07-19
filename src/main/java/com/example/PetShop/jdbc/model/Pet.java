@@ -7,18 +7,16 @@ public class Pet {
     private String breed;
     private String date_created;
     private String date_modified;
-    private int owner_id;
 
     public Pet() {
     }
 
-    public Pet(int id, String name, String breed, String date_created, String date_modified, int owner_id) {
+    public Pet(int id, String name, String breed, String date_created, String date_modified) {
         this.id = id;
         this.name = name;
         this.breed = breed;
         this.date_created = date_created;
         this.date_modified = date_modified;
-        this.owner_id = owner_id;
     }
 
     public int getId() {
@@ -61,13 +59,6 @@ public class Pet {
         this.date_modified = date_modified;
     }
 
-    public int getOwner_id() {
-        return owner_id;
-    }
-
-    public void setOwner_id(int owner_id) {
-        this.owner_id = owner_id;
-    }
 
     @Override
     public String toString() {
@@ -77,7 +68,6 @@ public class Pet {
                 ", breed='" + breed + '\'' +
                 ", date_created='" + date_created + '\'' +
                 ", date_modified='" + date_modified + '\'' +
-                ", owner_id=" + owner_id +
                 '}';
     }
 }
